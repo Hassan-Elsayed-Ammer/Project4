@@ -16,10 +16,11 @@ import org.koin.android.ext.android.inject
  * Activity that displays the reminder details after the user clicks on the notification
  */
 class ReminderDescriptionActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityReminderDescriptionBinding
 
-    val viewModel: ReminderDescriptionActivityViewModel by inject()
 
     companion object {
+        //  receive the reminder object after the user clicks on the notification
         fun newIntent(context: Context, reminderDataItem: ReminderDataItem): Intent {
             val intent = Intent(context, ReminderDescriptionActivity::class.java)
             intent.putExtra(EXTRA_ReminderDataItem, reminderDataItem)
@@ -27,24 +28,17 @@ class ReminderDescriptionActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var binding: ActivityReminderDescriptionBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(
             this,
             R.layout.activity_reminder_description
         )
-        binding.reminderDataItem = intent.getSerializableExtra("ReminderDataItem") as ReminderDataItem?
-        binding.edit.setOnClickListener{
-            val ent = Intent(this, RemindersActivity::class.java)
-            ent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            ent.putExtra("Id", binding.reminderDataItem!!)
-            startActivity(ent)
+        if (intent.hasExtra(EXTRA_ReminderDataItem)) {
+            val reminderDataItem:ReminderDataItem = intent.getSerializableExtra(
+                EXTRA_ReminderDataItem) as ReminderDataItem
+            binding.reminderDataItem = reminderDataItem
+            binding.executePendingBindings()
         }
-        binding.delete.setOnClickListener{
-            viewModel.deleteReminderById(binding.reminderDataItem!!)
-            Toast.makeText(this, "deleted", Toast.LENGTH_SHORT).show()
-        }
-
     }
 }
